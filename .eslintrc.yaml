@@ -1,0 +1,9 @@
+extends: '@absolunet/core'
+
+env:
+  node: true
+  browser: true
+
+rules:
+  class-methods-use-this: [off]
+  no-restricted-globals: [off]

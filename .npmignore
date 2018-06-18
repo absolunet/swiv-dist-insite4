@@ -1,0 +1,7 @@
+bower_components
+test
+.editorconfig
+.eslintrc.yaml
+.gitignore
+.travis.yml
+bower.json
