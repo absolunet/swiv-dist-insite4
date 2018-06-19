@@ -1,6 +1,6 @@
 {
 	"name": "swiv-dist-insite4",
-	"version": "1.0.0-alpha-1",
+	"version": "1.0.0-alpha.2",
 	"description": "Swiv package for Insite 4",
 	"homepage": "https://github.com/absolunet/swiv-dist-insite4",
    "author": {
@@ -30,8 +30,8 @@
     ".travis.yml"
   ],
   "dependencies": {
-    "swiv": "1.0.0-alpha.3",
-    "swiv-map-insite": "1.0.0-alpha.3",
+    "swiv": "1.0.0-alpha.4",
+    "swiv-map-insite": "1.0.0-alpha.4",
     "swiv-app-insiteangular": "1.0.0-alpha.3"
   }
 }
