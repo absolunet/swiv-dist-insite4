@@ -2084,7 +2084,7 @@ module.exports = {
 	preprocess: (response) => {
 		const products = [];
 
-		response.wishListCollection.forEach((wishList) => {
+		(response.wishListCollection || []).forEach((wishList) => {
 			(wishList.wishListLineCollection || []).forEach((wishListLine) => {
 				products.push(wishListLine);
 			});
@@ -2117,7 +2117,9 @@ module.exports = {
 module.exports = {
 	endpoint: '/sessions/current',
 	process: (data, geeService) => {
-		geeService.configs.set('currencyCode', data.currency.currencyCode);
+		if (data && data.currency && data.currency.currencyCode) {
+			geeService.configs.set('currencyCode', data.currency.currencyCode);
+		}
 	}
 };
 
