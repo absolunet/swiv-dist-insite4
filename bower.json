@@ -30,8 +30,8 @@
     ".travis.yml"
   ],
   "dependencies": {
-    "swiv": "1.0.0-alpha.4",
-    "swiv-map-insite": "1.0.0-alpha.5",
-    "swiv-app-insiteangular": "1.0.0-alpha.4"
+    "swiv": "1.0.0-beta.1",
+    "swiv-map-insite": "1.0.0-beta.1",
+    "swiv-app-insiteangular": "1.0.0-beta.1"
   }
 }
