@@ -2402,8 +2402,8 @@ module.exports = (ngModule) => {
 		}
 
 		onQuantityChange(newQuantity, oldQuantity) {
-			if (newQuantity !== oldQuantity || this.propertyHistoryService.getPropertyHistory(this.$scope.product, 'qtyOrdered').length === 0) {
-				this.propertyHistoryService.updateProperty(this.$scope.product, 'qtyOrdered', newQuantity);
+			if (newQuantity !== oldQuantity || this[propertyHistoryService].getPropertyHistory(this.$scope.product, 'qtyOrdered').length === 0) {
+				this[propertyHistoryService].updateProperty(this.$scope.product, 'qtyOrdered', newQuantity);
 			}
 		}
 

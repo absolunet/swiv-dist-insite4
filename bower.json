@@ -1,6 +1,6 @@
 {
 	"name": "swiv-dist-insite4",
-	"version": "1.0.0-beta.2",
+	"version": "1.0.0-beta.3",
 	"description": "Swiv package for Insite 4",
 	"homepage": "https://github.com/absolunet/swiv-dist-insite4",
    "author": {
@@ -32,6 +32,6 @@
   "dependencies": {
     "swiv": "1.0.0-beta.2",
     "swiv-map-insite": "1.0.0-beta.2",
-    "swiv-app-insiteangular": "1.0.0-beta.2"
+    "swiv-app-insiteangular": "1.0.0-beta.3"
   }
 }
