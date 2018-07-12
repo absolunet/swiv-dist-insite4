@@ -1721,15 +1721,24 @@ module.exports = class InsiteMapperService {
 			event.setMainData(mainData);
 
 			if (miscData) {
-				Object.keys(miscData).forEach((miscDataKey) => {
-					event.ecommerce[miscDataKey] = miscData[miscDataKey];
-				});
+				this.merge(event.ecommerce, miscData);
 			}
 
 			return event.getData();
 		}
 
 		return null;
+	}
+
+	merge(target, data) {
+		Object.keys(data).forEach((key) => {
+			if (typeof data[key] === 'object' && data[key]) {
+				target[key] = target[key] || (data[key] instanceof Array ? [] : {});
+				this.merge(target[key], data[key]);
+			} else {
+				target[key] = data[key];
+			}
+		});
 	}
 
 	registerPipe(event, pipe, order = 0) {
@@ -2760,17 +2769,20 @@ module.exports = (ngModule) => {
 
 		get watchedProperties() {
 			return {
+				shipTo: () => {
+					return 'Change shipping information';
+				},
 				notes: (n, o) => {
 					return (!n || !o) && n !== o ? `${n ? 'Add' : 'Remove'} notes` : null;
 				},
 				carrier: (n) => {
-					return n && n.description ? `Using carrier "${n.description}"` : null;
+					return n && n.description ? `Use carrier "${n.description}"` : null;
 				},
 				shipVia: (n) => {
 					return n && n.description ? `Order via "${n.description}"` : null;
 				},
 				paymentMethod: (n) => {
-					return n && n.description ? `Using payment method "${n.description}"` : null;
+					return n && n.description ? `Use payment method "${n.description}"` : null;
 				},
 				poNumber: (n, o) => {
 					return (!n || !o) && n !== o ? `${n ? 'Add' : 'Remove'} PO number` : null;
@@ -2817,7 +2829,7 @@ module.exports = (ngModule) => {
 			const { watchedProperties } = this;
 			Object.keys(watchedProperties).forEach((property) => {
 				const resolvedDiff = resolve(property, diff);
-				if (resolvedDiff) {
+				if (typeof resolvedDiff !== 'undefined') {
 					const oldValue = resolve(property, oldCart);
 					const option = typeof watchedProperties[property] === 'function' ? watchedProperties[property](resolvedDiff, oldValue) : property;
 					options.push(option);
