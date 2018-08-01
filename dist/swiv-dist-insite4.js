@@ -1451,7 +1451,10 @@ module.exports = class GoogleEnhancedEcommerceService {
 
 	registerEvent(event) {
 		this.eventService.subscribe(this.getEventName(event), (data) => {
-			window[this.configs.get('dataLayer', 'dataLayer')].push(data);
+			const dl = window[this.configs.get('dataLayer', 'dataLayer')];
+			if (dl && dl instanceof Array) {
+				dl.push(data);
+			}
 		});
 
 		this[`trigger${this.getCleanEventName(this.getEventModelClass(event), true)}`] = (data) => {
