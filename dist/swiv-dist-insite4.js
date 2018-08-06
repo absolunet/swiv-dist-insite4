@@ -466,8 +466,8 @@ module.exports = class AbstractInsiteMapper {
 		this.pipes = [];
 	}
 
-	getMappedData(data) {
-		const mainData = this.getMappedMainData(data);
+	getMappedData(data, event) {
+		const mainData = this.getMappedMainData(data, event);
 		const miscData = this.getMiscData(data);
 
 		const dataProps = data instanceof Array ? [] : Object.keys(data);
@@ -487,11 +487,11 @@ module.exports = class AbstractInsiteMapper {
 		return mappedData;
 	}
 
-	getMappedMainData(data) {
+	getMappedMainData(data, event) {
 		const mappedData = [];
 		this.getDataCollection(data).forEach((item) => {
 			const dataModel = this.getModel();
-			this.executePipeline(dataModel, item, data);
+			this.executePipeline(dataModel, item, data, event);
 			mappedData.push(dataModel.getData());
 		});
 
@@ -512,11 +512,11 @@ module.exports = class AbstractInsiteMapper {
 		return this;
 	}
 
-	executePipeline(dataModel, rawData, context) {
+	executePipeline(dataModel, ...args) {
 		this.pipes.sort((a, b) => {
 			return a.order > b.order;
 		}).forEach((pipeData) => {
-			pipeData.pipe(dataModel, rawData, context);
+			pipeData.pipe(dataModel, ...args);
 		});
 
 		this.cleanDataModel(dataModel);
@@ -1783,7 +1783,7 @@ module.exports = [];
 /***/ (function(module, exports) {
 
 module.exports = (productImpressionDataModel, productDto) => {
-	productImpressionDataModel.id = productDto.id;
+	productImpressionDataModel.id = productDto.productId || productDto.id;
 };
 
 
@@ -1977,22 +1977,22 @@ module.exports = __webpack_require__(21).concat([
 /* 75 */
 /***/ (function(module, exports) {
 
-module.exports = (productDataModel, productDto, context) => {
-	productDto.properties = productDto.properties || {};
-	if (productDataModel.price) {
-		if (typeof productDataModel.quantity !== 'undefined') {
-			[productDataModel.quantity] = [
-				productDto.qtyAdded,
-				productDto.qtyRemoved,
-				productDto.properties.qtyAdded,
-				productDto.properties.qtyRemoved,
-				context.qtyAdded,
-				context.qtyRemoved,
-				productDto.qtyOrdered
-			].filter((value) => {
-				return typeof value !== 'undefined';
-			});
-		}
+module.exports = (productDataModel, productDto, context, event) => {
+	const properties = productDto.properties || {};
+	if (['productClick', 'productDetail'].indexOf(event.event) === -1 &&
+		productDataModel.price &&
+		typeof productDataModel.quantity !== 'undefined') {
+		[productDataModel.quantity] = [
+			productDto.qtyAdded,
+			productDto.qtyRemoved,
+			properties.qtyAdded,
+			properties.qtyRemoved,
+			context.qtyAdded,
+			context.qtyRemoved,
+			productDto.qtyOrdered
+		].filter((value) => {
+			return typeof value !== 'undefined';
+		});
 	} else {
 		delete productDataModel.quantity;
 	}
@@ -2868,7 +2868,7 @@ module.exports = (ngModule) => {
 				})
 				.forEach((option) => {
 					this.geeService.triggerCheckoutOption({
-						misc: {
+						main: {
 							step,
 							option
 						}

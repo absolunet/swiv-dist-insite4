@@ -1,7 +1,7 @@
 {
-	"name": "swiv-dist-insite4",
-	"description": "Swiv package for Insite 4",
-	"homepage": "https://github.com/absolunet/swiv-dist-insite4",
+   "name": "swiv-dist-insite4",
+   "description": "Swiv package for Insite 4",
+   "homepage": "https://github.com/absolunet/swiv-dist-insite4",
    "author": {
     "name": "Absolunet",
     "url": "https://absolunet.com"
@@ -30,7 +30,7 @@
   ],
   "dependencies": {
     "swiv": "1.0.0-rc.2",
-    "swiv-map-insite": "1.0.0-rc.2",
-    "swiv-app-insiteangular": "1.0.0-rc.2"
+    "swiv-map-insite": "1.0.0-rc.3",
+    "swiv-app-insiteangular": "1.0.0-rc.3"
   }
 }
