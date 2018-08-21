@@ -791,7 +791,7 @@ module.exports = `${prefix}ProductClick`;
 module.exports = ($ctrls) => {
 	return $ctrls
 		.filter(($ctrl) => {
-			return $ctrl.$scope && $ctrl.$scope.product;
+			return $ctrl && $ctrl.$scope && $ctrl.$scope.product;
 		})
 		.map(($ctrl) => {
 			return $ctrl.$scope.product;
@@ -2455,6 +2455,10 @@ module.exports = class PropertyHistoryService {
 	}
 
 	getInstanceHistory(instance) {
+		if (!instance) {
+			return {};
+		}
+
 		if (!instanceHistories.has(instance)) {
 			const { id } = instance;
 			if (!guidHistories[id]) {
@@ -3192,7 +3196,7 @@ module.exports = {
 			misc: {
 				purchase: {
 					actionField: {
-						id: response.erpOrderNumber || response.orderNumber || response.id,
+						id: response ? response.erpOrderNumber || response.orderNumber || response.id : null,
 						affiliation: 'Online Store',
 						revenue: response.orderSubTotal.toFixed(2),
 						tax: response.totalTax.toFixed(2),

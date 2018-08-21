@@ -31,6 +31,6 @@
   "dependencies": {
     "swiv": "1.0.0-rc.2",
     "swiv-map-insite": "1.0.0-rc.3",
-    "swiv-app-insiteangular": "1.0.0-rc.3"
+    "swiv-app-insiteangular": "1.0.0-rc.4"
   }
 }
