@@ -1010,15 +1010,17 @@ module.exports = class CheckoutEventModel extends AbstractEventModel {
 		return {
 			event: 'checkout',
 			ecommerce: {
-				actionField: {},
-				products: []
+				checkout: {
+					actionField: {},
+					products: []
+				}
 			},
 			eventCallback: () => {} // eslint-disable-line no-empty-function
 		};
 	}
 
 	getMainDataKey() {
-		return 'ecommerce.products';
+		return 'ecommerce.checkout.products';
 	}
 
 	getMainDataType() {
@@ -2845,8 +2847,10 @@ module.exports = (ngModule) => {
 			this.geeService.triggerCheckout({
 				main: cart.cartLines,
 				misc: {
-					actionField: {
-						step: this.step
+					checkout: {
+						actionField: {
+							step: this.step
+						}
 					}
 				}
 			});
