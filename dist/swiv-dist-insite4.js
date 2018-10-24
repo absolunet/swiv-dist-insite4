@@ -2346,6 +2346,10 @@ module.exports = class InterceptorService {
 	}
 
 	triggerAction(res, { event, preprocess, process, postprocess }) {
+		if (res.config && res.config.noGeeTracking) {
+			return;
+		}
+
 		if (typeof preprocess === 'function') {
 			const preprocessedValue = preprocess(res.data, res.config.data, this, angular.copy(res.config));
 			if (preprocessedValue === false) {
