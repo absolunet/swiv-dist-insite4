@@ -1885,7 +1885,7 @@ module.exports = (productImpressionDataModel, productDto, context) => {
 
 module.exports = (productImpressionDataModel, productDto) => {
 	if (productDto.properties) {
-		productImpressionDataModel.brand = productDto.properties.brand;
+		productImpressionDataModel.brand = productDto.brand.name;
 	}
 };
 
@@ -3111,7 +3111,8 @@ module.exports = [
 	__webpack_require__(136),
 	__webpack_require__(137),
 	__webpack_require__(138),
-	__webpack_require__(139)
+	__webpack_require__(139),
+	__webpack_require__(140)
 ];
 
 
@@ -3369,13 +3370,28 @@ const cartRepository = __webpack_require__(30);
 
 module.exports = {
 	endpoint: '/carts/current',
+	method: urlHelper.methods.get,
+	process: (response) => {
+		if (response.cartLines.length > 0) {
+			cartRepository.setCart(response);
+		}
+	}
+};
+
+
+/***/ }),
+/* 137 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const { url:urlHelper } = __webpack_require__(0);
+
+module.exports = {
+	endpoint: '/carts/current',
 	method: urlHelper.methods.patch,
 	preprocess: (response, request) => {
 		if (['Processing', 'Submitted'].indexOf(response.status) === -1 || !request.cartLines || request.cartLines.length === 0) {
 			return false;
 		}
-
-		cartRepository.setCart(response);
 
 		return false;
 	}
@@ -3383,7 +3399,7 @@ module.exports = {
 
 
 /***/ }),
-/* 137 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { url:urlHelper, regex:regexHelper } = __webpack_require__(0);
@@ -3411,7 +3427,7 @@ module.exports = {
 
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { url:urlHelper } = __webpack_require__(0);
@@ -3458,7 +3474,7 @@ module.exports = {
 
 
 /***/ }),
-/* 139 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { regex:regexHelper, url:urlHelper } = __webpack_require__(0);
@@ -3470,36 +3486,36 @@ module.exports = {
 	method: urlHelper.methods.get,
 	preprocess: (response) => {
 
-		if (!response.promotions || response.promotions.length <= 0) {
+		const cart = cartRepository.getCart();
+
+		if (!cart) {
 			return false;
 		}
 
-		const [, currentCartId] = (new RegExp(`/carts/(${regexHelper.guidRegExp})/promotions/${regexHelper.guidRegExp}$`)).exec(response.promotions[0].uri);
-		const cart = cartRepository.getCart();
+		const misc = {
+			purchase: {
+				actionField: {
+					id: cart ? cart.erpOrderNumber || cart.orderNumber || cart.id : null,
+					affiliation: 'Online Store',
+					revenue: cart.orderSubTotal.toFixed(2),
+					tax: cart.totalTax.toFixed(2),
+					shipping: cart.shippingAndHandling.toFixed(2)
+				}
+			}
+		};
 
-		if (!cart || cart.id !== currentCartId) {
-			return false;
+		if (response.promotions && response.promotions.length > 0) {
+			const promoCodes = response.promotions ? response.promotions.filter((promotion) => { return promotion.promotionCode; })
+				.map((promotion) => { return promotion.promotionCode; }).join('|') : null;
+
+			misc.purchase.actionField.coupon = promoCodes;
 		}
 
 		cartRepository.unsetCart();
 
-		const promoCodes = response.promotions ? response.promotions.filter((promotion) => { return promotion.promotionCode; })
-			.map((promotion) => { return promotion.promotionCode; }).join('|') : null;
-
 		return {
 			main: cart.cartLines,
-			misc: {
-				purchase: {
-					actionField: {
-						id: cart ? cart.erpOrderNumber || cart.orderNumber || cart.id : null,
-						affiliation: 'Online Store',
-						revenue: cart.orderSubTotal.toFixed(2),
-						tax: cart.totalTax.toFixed(2),
-						shipping: cart.shippingAndHandling.toFixed(2),
-						coupon: promoCodes
-					}
-				}
-			},
+			misc: misc,
 			common: {
 				list: 'Cart'
 			}

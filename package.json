@@ -30,6 +30,7 @@
     "@absolunet/eslint-config-core": "0.3.0",
     "cross-env": "^5.1",
     "eslint-loader": "^2.0.0",
+    "eslint-plugin-vue": "^5.2.2",
     "laravel-mix": "2.1.11",
     "laravel-mix-eslint": "^0.1.1"
   }
