@@ -349,31 +349,27 @@ const __ = new WeakMap();
 class ProductContextRepository {
 
 	constructor() {
-		this.set({}, {}, []);
+		__.set(this, []);
 	}
 
-	set(event, context, products) {
-		this.unset();
-
-		__.set(this, {
-			event: event,
-			context: context,
-			products: products
-		});
+	all() {
+		return __.get(this).concat([]);
 	}
 
-	unset() {
-		if (__.has(this)) {
-			__.delete(this);
-		}
+	get(key) {
+		return __.get(this)[key];
 	}
 
-	get() {
-		if (__.has(this)) {
-			return __.get(this);
-		}
+	add(event, context, products) {
+		__.get(this).push({ event, context, products });
 
-		return null;
+		return this;
+	}
+
+	remove(key) {
+		__.get(this).splice(key, 1);
+
+		return this;
 	}
 
 }
@@ -3171,7 +3167,7 @@ module.exports = {
 		};
 
 		if (incompleteProducts.length) {
-			productContextRepository.set('productImpression', context, incompleteProducts);
+			productContextRepository.add('productImpression', context, incompleteProducts);
 
 			return false;
 		}
@@ -3215,7 +3211,7 @@ module.exports = {
 		};
 
 		if (response.product.pricing && response.product.pricing.requiresRealTimePrice) {
-			productContextRepository.set('productDetail', context, [response.product]);
+			productContextRepository.add('productDetail', context, [response.product]);
 
 			return false;
 		}
@@ -3254,7 +3250,7 @@ module.exports = {
 		};
 
 		if (incompleteProducts.length) {
-			productContextRepository.set('productImpression', context, incompleteProducts);
+			productContextRepository.add('productImpression', context, incompleteProducts);
 
 			return false;
 		}
@@ -3507,38 +3503,50 @@ module.exports = {
 	endpoint: '/realtimepricing',
 	method: urlHelper.methods.post,
 	process: (response, request, { geeService }) => {
-		const productContext = productContextRepository.get();
+		if (!response || !response.realTimePricingResults) {
+			return false;
+		}
 
-		if (productContext && productContext.event && productContext.context && productContext.products && productContext.products.length) {
-
-			if (response && response.realTimePricingResults) {
-				productContext.products.forEach((product) => {
-					const pricingResults = response.realTimePricingResults.filter((pricing) => {
-						return pricing.productId === product.id;
-					});
-
-					if (pricingResults.length) {
-						const indexOf = productContext.products.indexOf(product);
-						let pricingIndex = productContext.products.filter((p, i) => {
-							return p.id === product.id && i < indexOf;
-						}).length;
-						if (pricingIndex >= pricingResults.length) {
-							pricingIndex = pricingResults.length - 1;
-						}
-
-						product.pricing = pricingResults[pricingIndex];
-					}
+		productContextRepository.all().reverse().forEach((productContext, key) => {
+			const filteredProducts = productContext.products.filter((product) => {
+				return response.realTimePricingResults.some((pricing) => {
+					return pricing.productId === product.id;
 				});
+			});
+
+			if (filteredProducts.length === 0) {
+				return;
 			}
 
+			filteredProducts.forEach((product) => {
+				const pricingResults = response.realTimePricingResults.filter((pricing) => {
+					return pricing.productId === product.id;
+				});
+
+				if (pricingResults.length) {
+					const indexOf = productContext.products.indexOf(product);
+					let pricingIndex = productContext.products.filter((p, i) => {
+						return p.id === product.id && i < indexOf;
+					}).length;
+					if (pricingIndex >= pricingResults.length) {
+						pricingIndex = pricingResults.length - 1;
+					}
+
+					product.pricing = pricingResults[pricingIndex];
+				}
+			});
+
 			const data = {
-				main: productContext.products,
+				main: filteredProducts,
 				misc: {},
 				common: productContext.context
 			};
 
 			geeService.trigger(productContext.event, data);
-		}
+			productContextRepository.remove(key);
+		});
+
+		return true;
 	}
 };
 
